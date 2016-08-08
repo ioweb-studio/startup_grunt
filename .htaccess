@@ -1,0 +1,6 @@
+AddDefaultCharset utf-8
+
+Options +FollowSymlinks
+RewriteEngine On
+RewriteBase /
+AddHandler application/x-httpd-php .html

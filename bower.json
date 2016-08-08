@@ -1,0 +1,22 @@
+{
+  "name": "MONDEA",
+  "description": "",
+  "main": "package.json",
+  "authors": [
+    "ProjectSoft"
+  ],
+  "license": "ISC",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+	"jquery": "^1.12.4"
+  }
+}
