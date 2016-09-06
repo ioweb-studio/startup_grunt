@@ -10,6 +10,15 @@ module.exports = function(grunt) {
 		bc: "bower_components",
 		jq : 'bower_components/jquery',
 		bs : 'bower_components/bootstrap',
+		ftp: {
+			username: "login",
+			password: "password",
+			host: "host",
+			dest: "/public_html/",
+			port: 21,
+			incrementalUpdates: true
+		},
+		ftp_enabled: true
 	},
 	message = "ProjectSoft";
 	require('load-grunt-tasks')(grunt);
@@ -32,23 +41,42 @@ module.exports = function(grunt) {
 				}
 			}
 		},
-		concat: {
-			options: {
-				separator: '',
-			},
-			css : {
-				src: [
-					'<%= globalConfig.dev %>/<%= globalConfig.css %>/main.css'
+		modernizr: {
+			dist: {
+				"crawl": false,
+				"customTests": [],
+				"dest": "<%= globalConfig.tmp %>/modernizr-output.js",
+				"tests": [
+					"pointerevents",
+					"svg",
+					"touchevents",
+					"video",
+					"objectfit",
+					"cssvhunit",
+					"cssvmaxunit",
+					"cssvminunit",
+					"cssvwunit",
+					"videoautoplay",
+					"videoloop"
 				],
-				dest: '<%= globalConfig.assets %>/<%= globalConfig.css %>/main.css'
-			},
-			js : {
-				src : [
-					'<%= globalConfig.jq %>/dist/jquery.js',
-					'<%= globalConfig.bs %>/dist/js/bootstrap.js',
-					'<%= globalConfig.dev %>/<%= globalConfig.js %>/main.js'
+				"options": [
+					"domPrefixes",
+					"prefixes",
+					"addTest",
+					"atRule",
+					"hasEvent",
+					"mq",
+					"prefixed",
+					"prefixedCSS",
+					"prefixedCSSValue",
+					"testAllProps",
+					"testProp",
+					"testStyles",
+					"html5printshiv",
+					"html5shiv",
+					"setClasses"
 				],
-				dest: '<%= globalConfig.tmp %>/<%= globalConfig.js %>/main.js'
+				"uglify": false
 			}
 		},
 		uglify : {
@@ -58,6 +86,7 @@ module.exports = function(grunt) {
 			main: {
 				files: {
 					'<%= globalConfig.assets %>/<%= globalConfig.js %>/main.js': [
+						'<%= globalConfig.tmp %>/modernizr-output.js',
 						'<%= globalConfig.jq %>/dist/jquery.js',
 						'<%= globalConfig.bs %>/dist/js/bootstrap.js',
 						'<%= globalConfig.dev %>/<%= globalConfig.js %>/main.js'
@@ -80,7 +109,7 @@ module.exports = function(grunt) {
 						expand: true,
 						flatten : true,
 						src: [
-							'<%= globalConfig.dev %>/<%= globalConfig.img %>/*.{png,jpg,gif}'
+							'<%= globalConfig.dev %>/<%= globalConfig.img %>/*.{png,jpg,gif,svg}'
 						],
 						dest: '<%= globalConfig.dev %>/<%= globalConfig.img %>/optimized/',
 						filter: 'isFile'
@@ -93,6 +122,7 @@ module.exports = function(grunt) {
 				files: [
 					{
 						expand: true,
+						flatten : true,
 						src: [
 							'<%= globalConfig.bs %>/fonts/*',
 							'<%= globalConfig.dev %>/<%= globalConfig.fonts %>/*'
@@ -106,6 +136,7 @@ module.exports = function(grunt) {
 				files: [
 					{
 						expand: true,
+						flatten : true,
 						src: [
 							'<%= globalConfig.dev %>/<%= globalConfig.img %>/optimized/*'
 						],
@@ -115,26 +146,62 @@ module.exports = function(grunt) {
 				]
 			}
 		},
+		ftp_push: {
+			dist: {
+				options: gc.ftp,
+				files: [
+					{
+						expand: true,
+						flatten : true,
+						filter: 'isFile',
+						src: [
+							'<%= globalConfig.assets %>/**/*',
+							'android*.*',
+							'apple*.*',
+							'favico*.*',
+							'mstile*.*',
+							'safari*.*',
+							'browserconfig.xml',
+							'.htaccess',
+							'index.html',
+							'manifest.json'
+						]
+					}
+				]
+			}
+		},
 		watch: {
 			js: {
 				files: [
 					'<%= globalConfig.dev %>/<%= globalConfig.js %>/*.js'
 				],
-				tasks: ['notify:watch','uglify','notify:done']
+				tasks: gc.ftp_enabled ? ['notify:watch','modernizr','uglify','ftp_push','notify:done'] : ['notify:watch','modernizr','uglify','notify:done']
+			},
+			fonts: {
+				files: [
+					'<%= globalConfig.dev %>/<%= globalConfig.fonts %>/*.*'
+				],
+				tasks: gc.ftp_enabled ? ['notify:watch','copy:fonts','ftp_push','notify:done'] : ['notify:watch','copy:fonts','notify:done']
 			},
 			css: {
 				files: [
 					'<%= globalConfig.dev %>/<%= globalConfig.css %>/*.less',
 					'<%= globalConfig.dev %>/<%= globalConfig.css %>/mixins/*.less',
 				],
-				tasks: ['notify:watch','less','notify:done']
+				tasks: gc.ftp_enabled ? ['notify:watch','less','ftp_push','notify:done'] : ['notify:watch','less','notify:done']
 			},
 			images: {
 				files: [
-					'<%= globalConfig.dev %>/<%= globalConfig.img %>/*.{png,jpg,gif}'
+					'<%= globalConfig.dev %>/<%= globalConfig.img %>/*.{png,jpg,gif,svg}'
 				],
-				tasks: ['notify:watch','imagemin', 'copy:images', 'less','notify:done']
+				tasks: gc.ftp_enabled ? ['notify:watch','imagemin', 'copy:images', 'less','ftp_push','notify:done'] : ['notify:watch','imagemin', 'copy:images', 'less','notify:done']
 			},
+			html: {
+				files: [
+					'*.html'
+				],
+				tasks: gc.ftp_enabled ? ['notify:watch','ftp_push','notify:done'] : ['notify:watch','notify:done']
+			}
 		},
 		notify: {
 			watch: {
@@ -154,7 +221,7 @@ module.exports = function(grunt) {
 		}
 	});
 	
-	grunt.registerTask('default', 	['notify:watch','imagemin', 'uglify', 'copy', 'less','notify:done']);
+	grunt.registerTask('default', 	['notify:watch','imagemin', 'modernizr', 'uglify', 'copy', 'less','ftp_push','notify:done']);
 	grunt.registerTask('dev', 		['watch']);
 	
 };
