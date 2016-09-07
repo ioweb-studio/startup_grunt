@@ -47,6 +47,6 @@ for Opera Building
 $ grunt opera
 ````
 for Chrome Building
-`` ``
+````
 $ grunt chrome
 ````
