@@ -16,38 +16,3 @@ __Устанавливаем компоненты__
 ```
 bower install
 ```
-
-# :ru: Онлайн радио в твоём браузере
-Пакет разработчика для проверяющих расширения
-
-### Инициализация проекта
-````
-$ npm install --save-dev
-$ bower install --save-dev
-````
-### Сборка для Opera
-````
-$ grunt opera
-````
-### Сборка для Chrome
-````
-$ grunt chrome
-````
-
-# :gb: Online radio in your browser
-Developer package for checking expansion
-
-### Initialization of the project
-````
-$ npm install --save-dev
-$ bower install --save-dev
-````
-### for Opera Building
-````
-$ grunt opera
-````
-### for Chrome Building
-````
-$ grunt chrome
-````
-
